@@ -10,42 +10,6 @@ type Impl struct{
 
 	Storage map[string]*queue
 }
-//
-type queue struct{
-	Head 			*item
-	Tail 			*item
-
-	Len				int
-}
-
-type item struct{
-	Message string
-	Next *item
-	Prev *item
-}
-
-func (q *queue) put(msg string){
-	if q.Head == nil{
-		q.Head = &item{Message: msg}
-		q.Tail = q.Head
-	} else {
-		new := &item{Message: msg, Next: q.Head}
-		q.Head.Prev = new
-		q.Head = new
-	}
-	q.Len++
-}
-
-func (q *queue) get()string{
-	msg := q.Tail.Message
-
-	q.Tail = q.Tail.Prev
-	q.Tail.Next = nil
-
-	q.Len--
-
-	return msg
-}
 
 //
 func MakeImpl(maxMsgInQueue, maxQueues int)*Impl{
@@ -82,4 +46,41 @@ func (i *Impl) Get(queueName string)(types.MsgBody, error){
 	}
 
 	return msg, nil
+}
+
+//
+type queue struct{
+	Head 			*item
+	Tail 			*item
+
+	Len				int
+}
+
+type item struct{
+	Message string
+	Next *item
+	Prev *item
+}
+
+func (q *queue) put(msg string){
+	if q.Head == nil{
+		q.Head = &item{Message: msg}
+		q.Tail = q.Head
+	} else {
+		new := &item{Message: msg, Next: q.Head}
+		q.Head.Prev = new
+		q.Head = new
+	}
+	q.Len++
+}
+
+func (q *queue) get()string{
+	msg := q.Tail.Message
+
+	q.Tail = q.Tail.Prev
+	q.Tail.Next = nil
+
+	q.Len--
+
+	return msg
 }
