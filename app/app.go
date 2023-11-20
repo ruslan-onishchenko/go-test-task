@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"gotesttask/conf"
@@ -8,13 +9,14 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 
 
 type Queue interface{
 	Put(queueName string, msg types.MsgBody)error
-	Get(queueName string)(types.MsgBody, error)
+	Get(ctx context.Context, queueName string)(types.MsgBody, error)
 }
 
 func Start(conf conf.Configuration, queue Queue) error {
@@ -89,20 +91,18 @@ func getQueueName(r *http.Request)(string, error){
 
 func getKeeper(w http.ResponseWriter, r *http.Request, q Queue)(types.MsgBody, error){
 	var serialized []byte
-	var statusCode int
 	queueName, timeout, err:= getQueueNameAndTimeOut(r)
-	timeout = timeout
 	if err != nil {
 		serialized, _ = json.Marshal(err.Error())
-		statusCode = http.StatusBadRequest
 	}
-	m, err:=q.Get(queueName)
+	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Duration(timeout) * time.Second))
+	
+	m, err:=q.Get(ctx, queueName)
 	if err!=nil{
 		serialized, _ = json.Marshal(err.Error())
-		statusCode = http.StatusBadRequest
 	}
 	serialized, err = json.Marshal(m)
-	writeAnswer(w, statusCode, serialized)
+	writeAnswer(w, http.StatusOK, serialized)
 	return types.MsgBody{}, nil
 }
 
