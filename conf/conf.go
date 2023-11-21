@@ -1,40 +1,28 @@
 package conf
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"os"
+	"flag"
 )
 
 type Configuration struct {
-	Port					string	`json:"port"`
+	Port					int		`json:"port"`
 	QueueNumber				int		`json:"queue_number"`
 	MessageInQueueNumber	int		`json:"message_in_queue_number"`
 	TimeOut					int		`json:"timeout"`
 }
 
-func ReadConfig(args[]string) (Configuration, error){
-	jsonFile, err := os.Open("./conf.json")
-	if err != nil {
-		return Configuration{}, fmt.Errorf("Config file opening error ", err)
-	}
-	defer jsonFile.Close()
-	byteFileContent, err := io.ReadAll(jsonFile)
-	if err != nil {
-		return Configuration{}, fmt.Errorf("config file read error: ", err)
-	}
-	conf := Configuration{}
-	err = json.Unmarshal(byteFileContent, &conf)
-	if err != nil {
-		return Configuration{}, fmt.Errorf("config file decoding error: ", err)
-	}
-	return conf, nil
-	
-	// return Configuration{
-	// 	Port: "9999",
-	// 	QueueNumber: 10,
-	// 	MessageInQueueNumber: 20,
-	// 	TimeOut: 5,
-	// }, nil
+// ReadConfig - парсинг параметров командной строки.
+// Дефолт - ./gotesttask -p 9999 -mn 10 -qn 10 -t 5
+func ReadConfig() (Configuration, error){
+	port:=					flag.Int("p", 9999, "порт")
+	queueNumber:=			flag.Int("qn", 10, "количество очередей")
+	messageInQueueNumber:=	flag.Int("mn", 10, "количество сообщений в очереди")
+	timeOut:= 				flag.Int("t", 5, "тайм-аут")
+	flag.Parse()
+	return Configuration{
+		Port:					*port,
+		QueueNumber:			*queueNumber,
+		MessageInQueueNumber:	*messageInQueueNumber,
+		TimeOut: 				*timeOut,
+	}, nil
 }
