@@ -1,0 +1,6 @@
+{
+    "port":"9999",
+    "queue_number":20,
+    "message_in_queue_number":10,
+    "timeout":5
+}
